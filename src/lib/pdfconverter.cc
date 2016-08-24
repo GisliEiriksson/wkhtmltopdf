@@ -254,6 +254,7 @@ qreal PdfConverterPrivate::calculateHeaderHeight(PageObject & object, QWebPage &
     }
 
     QWebPrinter wp(header.mainFrame(), testPrinter, *testPainter);
+    wp.setNoReturnToScreenMode(true);
     qreal height = wp.elementLocation(header.mainFrame()->findFirstElement("body")).second.height();
 
     delete testPainter;
@@ -310,6 +311,7 @@ void PdfConverterPrivate::preprocessPage(PageObject & obj) {
 
 
 	QWebPrinter wp(obj.page->mainFrame(), printer, *painter);
+    wp.setNoReturnToScreenMode(true);
 	obj.pageCount = obj.settings.pagesCount? wp.pageCount(): 0;
 	pageCount += obj.pageCount;
 
@@ -658,6 +660,7 @@ void PdfConverterPrivate::endPage(PageObject & object, bool hasHeaderFooter, int
         printer->setPageMargins(leftMargin, 0, rightMargin, 0, settings.margin.left.second);
 		painter->translate(0, -spacing);
 		QWebPrinter wp(header->mainFrame(), printer, *painter);
+        wp.setNoReturnToScreenMode(true);
 		painter->translate(0,-wp.elementLocation(header->mainFrame()->findFirstElement("body")).second.height());
 		QVector<p_t> local;
 		QVector<p_t> external;
@@ -688,6 +691,7 @@ void PdfConverterPrivate::endPage(PageObject & object, bool hasHeaderFooter, int
         printer->setPageMargins(leftMargin, 0, rightMargin, 0, settings.margin.left.second);
 
 		QWebPrinter wp(footer->mainFrame(), printer, *painter);
+        wp.setNoReturnToScreenMode(true);
 
 		QVector<p_t> local;
 		QVector<p_t> external;
@@ -712,6 +716,7 @@ void PdfConverterPrivate::endPage(PageObject & object, bool hasHeaderFooter, int
 void PdfConverterPrivate::handleTocPage(PageObject & obj) {
 	painter->save();
 	QWebPrinter wp(obj.page->mainFrame(), printer, *painter);
+    wp.setNoReturnToScreenMode(true);
 	int pc = obj.settings.pagesCount? wp.pageCount(): 0;
 	if (pc != obj.pageCount) {
 		obj.pageCount = pc;
@@ -904,6 +909,7 @@ void PdfConverterPrivate::beginPrintObject(PageObject & obj) {
 
 	//output
 	webPrinter = new QWebPrinter(obj.page->mainFrame(), printer, *painter);
+    webPrinter->setNoReturnToScreenMode(true);
 	QString l1=obj.page->mainFrame()->url().path().split("/").back()+"#";
 	QString l2=obj.page->mainFrame()->url().toString() + "#";
 
