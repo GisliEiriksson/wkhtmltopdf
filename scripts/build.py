@@ -1017,7 +1017,7 @@ def check_msvc(config):
 def build_msvc(config, basedir):
     msvc, arch = rchop(config, '-dbg').split('-')
     generate_vcprojs = True
-    make_nsis = False
+    make_package = False
     
     vcdir = os.path.join(os.environ[MSVC_LOCATION[msvc]], '..', '..', 'VC')
     vcarg = 'x86'
@@ -1108,7 +1108,7 @@ def build_msvc(config, basedir):
             extra_options = mod_opts['extra_options']
         except KeyError:
             extra_options = ''
-        extra_options += ' CONFIG+=force-debug-info'
+        extra_options += ' CONFIG+=force_debug_info'
         try:
             configure_cmd = mod_opts['configure_cmd']
         except KeyError:
@@ -1120,7 +1120,6 @@ def build_msvc(config, basedir):
             vcproj_gen_cmds.append((os.path.join(qtdir, mod), qmake_vcproj_cmd))
     for (path, cmd) in vcproj_gen_cmds:
        os.chdir(path)
-       print cmd
        os.system(cmd)
         
     appdir = os.path.join(basedir, config, 'app')
@@ -1131,16 +1130,17 @@ def build_msvc(config, basedir):
 
     os.environ['WKHTMLTOX_VERSION'] = version
 
-    shell('%s %s\\..\\wkhtmltopdf.pro CONFIG+=force-debug-info' % (qmake, basedir))
+    shell('%s %s\\..\\wkhtmltopdf.pro CONFIG+=force_debug_info' % (qmake, basedir))
     shell(jom_builder)
-    if generate_vcprojs:
-        shell('%s -r -tp vc %s\\..\\wkhtmltopdf.pro CONFIG+=force-debug-info' % (qmake, basedir))
+    if generate_vcprojs and not exists(os.path.join(appdir, 'wkhtmltopdf.sln')):
+        shell('%s -r -tp vc %s\\..\\wkhtmltopdf.pro CONFIG+=force_debug_info' % (qmake, basedir))
 
-    if make_nsis:
+    if make_package:
         makensis = os.path.join(get_registry_value(r'SOFTWARE\NSIS'), 'makensis.exe')
         os.chdir(os.path.join(basedir, '..'))
         shell('"%s" /DVERSION=%s /DSIMPLE_VERSION=%s /DTARGET=%s /DMSVC /DARCH=%s wkhtmltox.nsi' % \
                 (makensis, version, nsis_version(simple_version), config, arch))
+        # TODO: Make zip file with PDBs
 
 # ------------------------------------------------ MinGW-W64 Cross Environment
 
