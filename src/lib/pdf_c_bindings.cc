@@ -30,6 +30,13 @@
 
 #include <QHash>
 
+// https://bugzilla.redhat.com/show_bug.cgi?id=1257630
+#ifdef Q_OS_WIN
+#include <QtPlugin>
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+//Q_IMPORT_PLUGIN(qwindows)
+#endif
+
 #include "dllbegin.inc"
 /**
  * \page pagesettings Setting
