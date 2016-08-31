@@ -154,12 +154,17 @@ private:
 	QHash<QString, PageObject *> urlToPageObj;
 
 	Outline * outline;
+    
+    bool printerIsConfigured;
+
 	void findLinks(QWebFrame * frame, QVector<QPair<QWebElement, QString> > & local, QVector<QPair<QWebElement, QString> > & external, QHash<QString, QWebElement> & anchors);
 	void endPage(PageObject & object, bool hasHeaderFooter, int objectPage,  int pageNumber);
 	void fillParms(QHash<QString, QString> & parms, int page, const PageObject & object);
 	QString hfreplace(const QString & q, const QHash<QString, QString> & parms);
 	QWebPage * loadHeaderFooter(QString url, const QHash<QString, QString> & parms, const settings::PdfObject & ps);
     qreal calculateHeaderHeight(PageObject & object, QWebPage & header);
+    void setupPrinterConfig();
+    void setupPrinterConfig(double maxHeaderHeight, double maxFooterHeight);
 
 #endif
 	QWebPage * currentHeader;

@@ -83,6 +83,7 @@ PdfConverterPrivate::PdfConverterPrivate(PdfGlobal & s, PdfConverter & o) :
     , webPrinter(0), measuringHFLoader(s.load), hfLoader(s.load), tocLoader1(s.load), tocLoader2(s.load)
 	, tocLoader(&tocLoader1), tocLoaderOld(&tocLoader2)
     , outline(0), currentHeader(0), currentFooter(0)
+    , printerIsConfigured(false)
 #endif
 {
 
@@ -145,6 +146,15 @@ void PdfConverterPrivate::beginConvert() {
 	currentPhase=0;
 	errorCode=0;
 
+	//We currently only support margins with the same unit
+	if (settings.margin.left.second != settings.margin.right.second ||
+		settings.margin.left.second != settings.margin.top.second ||
+		settings.margin.left.second != settings.margin.bottom.second) {
+		emit out.error("Currently all margin units must be the same!");
+		fail();
+		return;
+	}
+
 #ifndef __EXTENSIVE_WKHTMLTOPDF_QT_HACK__
 	if (objects.size() > 1) {
 		emit out.error("This version of wkhtmltopdf is build against an unpatched version of QT, and does not support more then one input document.");
@@ -154,6 +164,12 @@ void PdfConverterPrivate::beginConvert() {
 #else
     bool headerHeightsCalcNeeded = false;
 #endif
+
+	printer = new QPrinter(settings.resolution);
+	printer->setOutputFormat(QPrinter::PdfFormat);
+    painter = new QPainter();
+
+	if (settings.dpi != -1) printer->setResolution(settings.dpi);
 
 	for (QList<PageObject>::iterator i=objects.begin(); i != objects.end(); ++i) {
 		PageObject & o=*i;
@@ -202,6 +218,7 @@ void PdfConverterPrivate::beginConvert() {
 		if (!s.isTableOfContent) {
 			o.loaderObject = pageLoader.addResource(s.page, s.load, &o.data);
 			o.page = &o.loaderObject->page;
+            o.page->mainFrame()->setZoomFactor(s.load.zoomFactor);
 			PageObject::webPageToObject[o.page] = &o;
 			updateWebSettings(o.page->settings(), s.web);
 		}
@@ -223,10 +240,15 @@ void PdfConverterPrivate::beginConvert() {
             settings.margin.bottom.first = 10;
         }
 
+        setupPrinterConfig(settings.margin.top.first, settings.margin.bottom.first);
         for (QList<PageObject>::iterator i=objects.begin(); i != objects.end(); ++i) {
             PageObject & o=*i;
             o.headerReserveHeight = settings.margin.top.first;
             o.footerReserveHeight = settings.margin.bottom.first;
+
+            if (!o.settings.isTableOfContent) {
+                QWebPrinter::setupFrameForPrinting(*o.page->mainFrame(), *printer);
+            }
         }
 
         pageLoader.load();
@@ -324,6 +346,56 @@ void PdfConverterPrivate::preprocessPage(PageObject & obj) {
 }
 #endif
 
+void PdfConverterPrivate::setupPrinterConfig()
+{
+#ifdef __EXTENSIVE_WKHTMLTOPDF_QT_HACK__
+    if (printerIsConfigured)
+        return;
+
+    double maxHeaderHeight = objects[0].headerReserveHeight;
+    double maxFooterHeight = objects[0].footerReserveHeight;
+    
+    for (QList<PageObject>::iterator i=objects.begin(); i != objects.end(); ++i) {
+        PageObject & o=*i;
+        maxHeaderHeight = std::max(maxHeaderHeight, o.headerReserveHeight);
+        maxFooterHeight = std::max(maxFooterHeight, o.footerReserveHeight);
+    }
+    setupPrinterConfig(maxHeaderHeight, maxFooterHeight);
+#else
+    setupPrinterConfig(0, 0);
+#endif
+}
+
+void PdfConverterPrivate::setupPrinterConfig(double maxHeaderHeight, double maxFooterHeight)
+{
+#ifdef __EXTENSIVE_WKHTMLTOPDF_QT_HACK__
+    if (printerIsConfigured)
+        return;
+
+    printer->setPageMargins(settings.margin.left.first, maxHeaderHeight,
+                                settings.margin.right.first, maxFooterHeight,
+                                settings.margin.left.second);
+#else
+    printer->setPageMargins(settings.margin.left.first, settings.margin.top.first,
+                                settings.margin.right.first, settings.margin.bottom.first,
+                                settings.margin.left.second);
+#endif
+
+	if ((settings.size.height.first != -1) && (settings.size.width.first != -1)) {
+		printer->setPaperSize(QSizeF(settings.size.width.first,settings.size.height.first), settings.size.height.second);
+	} else {
+		printer->setPaperSize(settings.size.pageSize);
+	}
+
+	printer->setOrientation(settings.orientation);
+	printer->setColorMode(settings.colorMode);
+	printer->setCreator("wkhtmltopdf " STRINGIZE(FULL_VERSION));
+
+#ifdef __EXTENSIVE_WKHTMLTOPDF_QT_HACK__
+    printerIsConfigured = true;
+#endif
+}
+
 /*!
  * Prepares printing out the document to the pdf file
  */
@@ -346,49 +418,11 @@ void PdfConverterPrivate::pagesLoaded(bool ok) {
 	if (settings.out.isEmpty())
 	  lout = tempOut.create(".pdf");
 
-	printer = new QPrinter(settings.resolution);
-	if (settings.dpi != -1) printer->setResolution(settings.dpi);
 	//Tell the printer object to print the file <out>
-
 	printer->setOutputFileName(lout);
-	printer->setOutputFormat(QPrinter::PdfFormat);
 
-	//We currently only support margins with the same unit
-	if (settings.margin.left.second != settings.margin.right.second ||
-		settings.margin.left.second != settings.margin.top.second ||
-		settings.margin.left.second != settings.margin.bottom.second) {
-		emit out.error("Currently all margin units must be the same!");
-		fail();
-		return;
-	}
-
-    //Setup margins and papersize
-#ifdef __EXTENSIVE_WKHTMLTOPDF_QT_HACK__
-    double maxHeaderHeight = objects[0].headerReserveHeight;
-    double maxFooterHeight = objects[0].footerReserveHeight;
-    for (QList<PageObject>::iterator i=objects.begin(); i != objects.end(); ++i) {
-        PageObject & o=*i;
-        maxHeaderHeight = std::max(maxHeaderHeight, o.headerReserveHeight);
-        maxFooterHeight = std::max(maxFooterHeight, o.footerReserveHeight);
-    }
-    printer->setPageMargins(settings.margin.left.first, maxHeaderHeight,
-                                settings.margin.right.first, maxFooterHeight,
-                                settings.margin.left.second);
-#else
-    printer->setPageMargins(settings.margin.left.first, settings.margin.top.first,
-                                settings.margin.right.first, settings.margin.bottom.first,
-                                settings.margin.left.second);
-#endif
-
-	if ((settings.size.height.first != -1) && (settings.size.width.first != -1)) {
-		printer->setPaperSize(QSizeF(settings.size.width.first,settings.size.height.first), settings.size.height.second);
-	} else {
-		printer->setPaperSize(settings.size.pageSize);
-	}
-
-	printer->setOrientation(settings.orientation);
-	printer->setColorMode(settings.colorMode);
-	printer->setCreator("wkhtmltopdf " STRINGIZE(FULL_VERSION));
+    // Setup margins and papersize
+    setupPrinterConfig();
 
 	if (!printer->isValid()) {
 		emit out.error("Unable to write to destination");
@@ -407,8 +441,6 @@ void PdfConverterPrivate::pagesLoaded(bool ok) {
 	printer->printEngine()->setProperty(QPrintEngine::PPK_ImageQuality, settings.imageQuality);
 	printer->printEngine()->setProperty(QPrintEngine::PPK_ImageDPI, settings.imageDPI);
 	printer->printEngine()->setProperty(QPrintEngine::PPK_ForceJPEG, settings.forceJPEG);
-
-	painter = new QPainter();
 
 	title = settings.documentTitle;
 	for (int d=0; d < objects.size(); ++d) {
