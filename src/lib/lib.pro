@@ -17,6 +17,7 @@
 
 TEMPLATE = lib
 CONFIG += dll
+QT += gui
 
 include(../../common.pri)
 include(lib.pri)
@@ -35,6 +36,12 @@ unix {
 
 windows {
    TARGET_EXT=.dll
+   QT_PLUGIN += qwindows
+   QT_PLUGIN.platforms += qwindows
+   # https://bugzilla.redhat.com/show_bug.cgi?id=1257630
+   LIBS += -L$$[QT_INSTALL_PLUGINS]/platforms
+   debug:LIBS += -lqwindowsd
+   release:LIBS += -lqwindows
 }
 
 TARGET=wkhtmltox

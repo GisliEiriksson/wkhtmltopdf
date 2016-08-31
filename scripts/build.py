@@ -63,7 +63,6 @@ QT_CONFIG = {
     'common' : [
         '-opensource',
         '-confirm-license',
-        '-release',
         '-force-debug-info',
         '-static',
         '-system-zlib',
@@ -94,6 +93,14 @@ QT_CONFIG = {
         '-D QT_NO_STYLE_MOTIF',
         '-D QT_NO_STYLE_PLASTIQUE',
         '-D QT_NO_PRINTPREVIEWDIALOG'
+    ],
+    'common-release': [
+        '-release',
+        '-ltcg'
+    ],
+    'common-debug': [
+        'remove:-release',
+        '-debug'
     ],
 
     'msvc': [
@@ -639,7 +646,8 @@ def qt_config(key, *opts):
         if not arg.startswith('remove:-'):
             output.append(arg)
         elif arg[1+arg.index(':'):] in output:
-            output.remove(arg[1+arg.index(':'):])
+            cfg_name = arg[1+arg.index(':'):]
+            output.remove(cfg_name)
     return ' '.join(output)
 
 def fpm_params(cfg, ver):
@@ -1020,6 +1028,7 @@ def build_msvc(config, basedir):
     msvc, arch = rchop(config, '-dbg').split('-')
     generate_vcprojs = True
     make_package = False
+    debug = config.endswith('-dbg')
     
     vcdir = os.path.join(os.environ[MSVC_LOCATION[msvc]], '..', '..', 'VC')
     vcarg = 'x86'
@@ -1046,8 +1055,8 @@ def build_msvc(config, basedir):
     cygwin  = get_registry_value(r'SOFTWARE\Cygwin\setup', 'rootdir')
     cygdest = get_output(os.path.join(cygwin, 'bin', 'cygpath.exe'), '-ua', libdir)
     cflags  = '/Zi'
-    cflags += config.endswith('-dbg') and ' /MDd' or ' /MD'
-    icu_dbg = config.endswith('-dbg') and '--enable-debug --disable-release' or ''
+    cflags += debug and ' /MDd' or ' /MD /GL'
+    icu_dbg = debug and '--enable-debug --disable-release' or ''
     _, ruby_bin_dir = windows_find_ruby()
     if ruby_bin_dir:
         path = r'%s;%s' % (path, ruby_bin_dir)
@@ -1132,10 +1141,17 @@ def build_msvc(config, basedir):
 
     os.environ['WKHTMLTOX_VERSION'] = version
 
-    shell('%s %s\\..\\wkhtmltopdf.pro CONFIG+=force_debug_info' % (qmake, basedir))
+    opts = "CONFIG+=force_debug_info"
+    if not debug:
+        opts += " CONFIG+=ltcg CONFIG-=debug"
+    #print '%s %s\\..\\wkhtmltopdf.pro %s' % (qmake, basedir, opts)
+    #print jom_builder
+    #shell('cmd')
+    #return
+    shell('%s %s\\..\\wkhtmltopdf.pro %s' % (qmake, basedir, opts))
     shell(jom_builder)
-    if generate_vcprojs and not exists(os.path.join(appdir, 'wkhtmltopdf.sln')):
-        shell('%s -r -tp vc %s\\..\\wkhtmltopdf.pro CONFIG+=force_debug_info' % (qmake, basedir))
+    if generate_vcprojs :
+        shell('%s -r -tp vc %s\\..\\wkhtmltopdf.pro %s' % (qmake, basedir, opts))
 
     if make_package:
         makensis = os.path.join(get_registry_value(r'SOFTWARE\NSIS'), 'makensis.exe')
@@ -1476,7 +1492,9 @@ def main():
     final_config = config
     if '-debug' in sys.argv[2:]:
         final_config += '-dbg'
-        QT_CONFIG['common'].extend(['remove:-release', '-debug'])
+        QT_CONFIG['common'].extend(QT_CONFIG['common-debug'])
+    else:
+        QT_CONFIG['common'].extend(QT_CONFIG['common-release'])
 
     if '-clean' in sys.argv[2:]:
         rmdir(os.path.join(basedir, final_config))
