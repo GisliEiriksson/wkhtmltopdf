@@ -97,7 +97,6 @@ QT_CONFIG = {
     ],
 
     'msvc': [
-        '-mp',
         '-no-angle',
         '-openssl-linked'           # static linkage for OpenSSL
     ],
