@@ -445,6 +445,9 @@ DEPENDENT_LIBS = {
                 'result': [
                     'include/unicode/ucnv.h', 'include/unicode/ustring.h', ('lib/sicuin.lib', 'lib/sicuind.lib'), ('lib/sicudt.lib', 'lib/sicudtd.lib'),
                     ('lib/sicuin.pdb', 'lib/icu4c.pdb')],
+                'replace': [
+                    ('source/tools/pkgdata/pkgdata.cpp', 'sprintf(cmd, "%s %s -o %s",', 'sprintf(cmd, "%%s %%s -o %%s /GL-",')
+                ],
                 'commands': [
                     'SET "CFLAGS=%(cflags)s /Fd%(destdir)s/lib/icu4c.pdb" && SET "CXXFLAGS=%(cflags)s /Fd%(destdir)s/lib/icu4c.pdb" && '+
                     'bash source/runConfigureICU %(icu_dbg)s Cygwin/MSVC --enable-static --disable-shared --disable-tests --disable-samples --prefix=%(cygdest)s',
