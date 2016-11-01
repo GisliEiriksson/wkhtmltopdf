@@ -438,8 +438,8 @@ DEPENDENT_LIBS = {
 
     'icu4c': {
         'order' : 6,
-        'url' : 'http://download.icu-project.org/files/icu4c/57.1/icu4c-57_1-src.tgz',
-        'sha1': 'ca5f5cc584f45e87bf56bf8b7f9244d12a5ada67',
+        'url' : 'http://download.icu-project.org/files/icu4c/58.1/icu4c-58_1-src.tgz',
+        'sha1': '0739f45f985e4dfd0fcda978aecbb0de4d7ddaa6',
         'build' : {
             'msvc*': {
                 'result': [
