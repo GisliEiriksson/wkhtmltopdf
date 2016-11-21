@@ -1060,6 +1060,7 @@ def build_msvc(config, basedir):
     _, ruby_bin_dir = windows_find_ruby()
     if ruby_bin_dir:
         path = r'%s;%s' % (path, ruby_bin_dir)
+    path = r'%s;%s' % (os.path.dirname(python), path)
     os.environ['PATH'] = r'%s;%s\bin' % (path, cygwin)
     
     jomdir = download_zipfile(JOM_DISTRIBUTION['url'], JOM_DISTRIBUTION['sha1'],
