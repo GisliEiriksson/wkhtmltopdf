@@ -1143,8 +1143,10 @@ def build_msvc(config, basedir):
     os.environ['WKHTMLTOX_VERSION'] = version
 
     opts = "CONFIG+=force_debug_info"
-    if not debug:
-        opts += " CONFIG+=ltcg CONFIG-=debug"
+    if debug:
+        opts += " CONFIG+=debug CONFIG-=release"
+    else:
+        opts += " CONFIG+=release CONFIG-=debug CONFIG+=ltcg"
 
     shell('%s %s\\..\\wkhtmltopdf.pro %s' % (qmake, basedir, opts))
     shell(jom_builder)
