@@ -568,10 +568,10 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT += src/lib/pdf.h src/lib/pdf_c_bindings.cc
-INPUT += src/lib/image.h src/lib/image_c_bindings.cc
-INPUT += src/lib/pdfsettings.hh src/lib/pdfsettings.cc
-INPUT += src/lib/imagesettings.hh src/lib/imagesettings.cc
+INPUT += include/wkhtmltox/pdf.h src/lib/pdf_c_bindings.cc
+INPUT += include/wkhtmltox/image.h src/lib/image_c_bindings.cc
+INPUT += include/wkhtmltox/pdfsettings.hh src/lib/pdfsettings.cc
+INPUT += include/wkhtmltox/imagesettings.hh src/lib/imagesettings.cc
 INPUT += src/lib/doc.cc
 
 # This tag can be used to specify the character encoding of the source files

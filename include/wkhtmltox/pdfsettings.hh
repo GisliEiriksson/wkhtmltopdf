@@ -88,7 +88,7 @@ struct DLL_PUBLIC PdfGlobal {
 	//! Should we use the graphics system
 	bool useGraphics;
 	
-	//! Should relative links be resolved
+	//! Should relative links be resolved or kept as-is
 	bool resolveRelativeLinks;
 
 	//! Should we orientate in landscape or portrate

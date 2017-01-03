@@ -18,26 +18,26 @@
 DEFINES += BUILDING_DLL
 
 #Shared
-PUBLIC_HEADERS += ../lib/converter.hh ../lib/multipageloader.hh ../lib/dllbegin.inc
-PUBLIC_HEADERS += ../lib/dllend.inc ../lib/loadsettings.hh ../lib/websettings.hh
-PUBLIC_HEADERS += ../lib/utilities.hh
+PUBLIC_HEADERS += ../../include/wkhtmltox/converter.hh ../../include/wkhtmltox/multipageloader.hh ../../include/wkhtmltox/dllbegin.inc
+PUBLIC_HEADERS += ../../include/wkhtmltox/dllend.inc ../../include/wkhtmltox/loadsettings.hh ../../include/wkhtmltox/websettings.hh
+PUBLIC_HEADERS += ../../include/wkhtmltox/utilities.hh
 HEADERS += ../lib/multipageloader_p.hh  ../lib/converter_p.hh
 SOURCES += ../lib/loadsettings.cc ../lib/multipageloader.cc ../lib/tempfile.cc \
 	   ../lib/converter.cc ../lib/websettings.cc  \
   	   ../lib/reflect.cc ../lib/utilities.cc
 
 #Pdf
-PUBLIC_HEADERS += ../lib/pdfconverter.hh ../lib/pdfsettings.hh
+PUBLIC_HEADERS += ../../include/wkhtmltox/pdfconverter.hh ../../include/wkhtmltox/pdfsettings.hh
 HEADERS += ../lib/pdfconverter_p.hh
 SOURCES += ../lib/pdfsettings.cc ../lib/pdfconverter.cc \
            ../lib/outline.cc ../lib/tocstylesheet.cc
 
-PUBLIC_HEADERS += ../lib/imageconverter.hh ../lib/imagesettings.hh
+PUBLIC_HEADERS += ../../include/wkhtmltox/imageconverter.hh ../../include/wkhtmltox/imagesettings.hh
 HEADERS += ../lib/imageconverter_p.hh
 SOURCES += ../lib/imagesettings.cc ../lib/imageconverter.cc
 
 #C-Bindings
-PUBLIC_HEADERS += ../lib/pdf.h ../lib/image.h
+PUBLIC_HEADERS += ../../include/wkhtmltox/pdf.h ../../include/wkhtmltox/image.h
 HEADERS += ../lib/pdf_c_bindings_p.hh ../lib/image_c_bindings_p.hh
 SOURCES += ../lib/pdf_c_bindings.cc ../lib/image_c_bindings.cc
 

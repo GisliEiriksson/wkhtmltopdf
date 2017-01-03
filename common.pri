@@ -21,6 +21,7 @@ CONFIG(static, shared|static):lessThan(QT_MAJOR_VERSION, 5) {
 }
 
 INCLUDEPATH += ../../include
+INCLUDEPATH += ../../include/wkhtmltox
 RESOURCES    = $$PWD/wkhtmltopdf.qrc
 
 win32: CONFIG += console
