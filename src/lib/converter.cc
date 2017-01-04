@@ -83,6 +83,12 @@ void ConverterPrivate::forwardWarning(QString warning) {
 	emit outer().warning(warning);
 }
 
+void ConverterPrivate::forwardNetworkRequest(
+	QNetworkAccessManager& nam, QNetworkAccessManager::Operation op,
+	const QNetworkRequest& req, QIODevice* outgoingData, QNetworkReply*& reply) {
+	emit outer().networkRequest(nam, op, req, outgoingData, reply);
+}
+
 void ConverterPrivate::cancel() {
 	error=true;
 }

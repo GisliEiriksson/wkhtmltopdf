@@ -19,6 +19,10 @@
 #define __CONVERTER_HH__
 
 #include <QObject>
+#include <QNetworkAccessManager>
+#include <QIODevice>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include <wkhtmltox/loadsettings.hh>
 #include <wkhtmltox/dllbegin.inc>
 
@@ -42,6 +46,8 @@ signals:
     void phaseChanged();
     void progressChanged(int progress);
     void finished(bool ok);
+    void networkRequest(QNetworkAccessManager& nam, QNetworkAccessManager::Operation op,
+		const QNetworkRequest& req, QIODevice* outgoingData, QNetworkReply*& reply);
 
 	void checkboxSvgChanged(const QString & path);
 	void checkboxCheckedSvgChanged(const QString & path);

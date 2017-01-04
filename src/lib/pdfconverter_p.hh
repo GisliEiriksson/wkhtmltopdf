@@ -114,6 +114,7 @@ public:
 private:
 	PdfConverter & out;
 	void clearResources();
+	void connectPageLoaderSignals(MultiPageLoader& pageLoader, const char* loadMemberSlot);
 	TempFile tempOut;
 	QByteArray outputData;
 

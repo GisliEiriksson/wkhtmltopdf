@@ -62,6 +62,8 @@ signals:
 	void loadStarted();
 	void warning(QString text);
 	void error(QString text);
+	void networkRequest(QNetworkAccessManager& nam, QNetworkAccessManager::Operation op,
+		const QNetworkRequest& req, QIODevice* outgoingData, QNetworkReply*& reply);
 private:
 	MultiPageLoaderPrivate * d;
 	friend class MultiPageLoaderPrivate;

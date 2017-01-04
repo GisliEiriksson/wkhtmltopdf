@@ -235,15 +235,38 @@ void MyPdfConverter::finished(bool ok) {
 	if (finished_cb) (finished_cb)(reinterpret_cast<wkhtmltopdf_converter*>(this), ok);
 }
 
+void MyPdfConverter::networkRequest(QNetworkAccessManager& nam, QNetworkAccessManager::Operation op,
+	const QNetworkRequest& req, QIODevice* outgoingData, QNetworkReply*& reply) {
+
+	if (request_cb) {
+		reply = reinterpret_cast<QNetworkReply*>(request_cb(
+			reinterpret_cast<wkhtmltopdf_converter*>(this),
+			reinterpret_cast<wkhtmltox_network_access_manager*>(&nam),
+			static_cast<wkhtmltox_network_operation>(op),
+			reinterpret_cast<const wkhtmltox_network_request*>(&req),
+			reinterpret_cast<wkhtmltox_stream*>(outgoingData)));
+		
+	}
+	else {
+		reply = nullptr;
+	}
+}
+
 MyPdfConverter::MyPdfConverter(settings::PdfGlobal * gs):
 	warning_cb(0), error_cb(0), phase_changed(0), progress_changed(0), finished_cb(0),
+	request_cb(0),
 	converter(*gs), globalSettings(gs) {
 
-    connect(&converter, SIGNAL(warning(const QString &)), this, SLOT(warning(const QString &)));
+	connect(&converter, SIGNAL(warning(const QString &)), this, SLOT(warning(const QString &)));
 	connect(&converter, SIGNAL(error(const QString &)), this, SLOT(error(const QString &)));
 	connect(&converter, SIGNAL(phaseChanged()), this, SLOT(phaseChanged()));
 	connect(&converter, SIGNAL(progressChanged(int)), this, SLOT(progressChanged(int)));
 	connect(&converter, SIGNAL(finished(bool)), this, SLOT(finished(bool)));
+	connect(&converter,
+		&PdfConverter::networkRequest,
+		this,
+		&MyPdfConverter::networkRequest,
+		Qt::DirectConnection);
 }
 
 MyPdfConverter::~MyPdfConverter() {
@@ -534,6 +557,16 @@ CAPI(void) wkhtmltopdf_set_progress_changed_callback(wkhtmltopdf_converter * con
  */
 CAPI(void) wkhtmltopdf_set_finished_callback(wkhtmltopdf_converter * converter, wkhtmltopdf_int_callback cb) {
 	reinterpret_cast<MyPdfConverter *>(converter)->finished_cb = cb;
+}
+
+/**
+ * \brief Set the function that should be called whenever an external resource is requested.
+
+ * \param converter The converter which network request events to call back from
+ * \param cb The function to call when an external resource is requested.
+*/
+CAPI(void) wkhtmltopdf_set_network_request_callback(wkhtmltopdf_converter * converter, wkhtmltopdf_request_callback cb) {
+	reinterpret_cast<MyPdfConverter *>(converter)->request_cb = cb;
 }
 
 //CAPI(void) wkhtmltopdf_begin_conversion(wkhtmltopdf_converter * converter) {

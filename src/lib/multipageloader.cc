@@ -1,7 +1,7 @@
 // -*- mode: c++; tab-width: 4; indent-tabs-mode: t; eval: (progn (c-set-style "stroustrup") (c-set-offset 'innamespace 0)); -*-
 // vi:set ts=4 sts=4 sw=4 noet :
 //
-// Copyright 2010, 2011 wkhtmltopdf authors
+// Copyright 2010-2017 wkhtmltopdf authors
 //
 // This file is part of wkhtmltopdf.
 //
@@ -77,6 +77,11 @@ QNetworkReply * MyNetworkAccessManager::createRequest(Operation op, const QNetwo
 		r2.setUrl(QUrl("about:blank"));
 		return QNetworkAccessManager::createRequest(op, r2, outgoingData);
 	}
+
+	QNetworkReply* rep = nullptr;
+	emit networkRequest(*this, op, req, outgoingData, rep);
+	if (rep)
+		return rep;
 
 	bool isLocalFileAccess = req.url().scheme().length() <= 1 || req.url().scheme() == "file";
 	if (isLocalFileAccess && settings.blockLocalFileAccess) {
@@ -184,6 +189,12 @@ ResourceObject::ResourceObject(MultiPageLoaderPrivate & mpl, const QUrl & u, con
 	connect(&networkAccessManager, SIGNAL(finished (QNetworkReply *)),
 			this, SLOT(amfinished (QNetworkReply *) ) );
 
+	connect(&networkAccessManager,
+		&MyNetworkAccessManager::networkRequest,
+		this,
+		&ResourceObject::networkRequest,
+		Qt::DirectConnection);
+	
 	connect(&networkAccessManager, SIGNAL(warning(const QString &)),
 			this, SLOT(warning(const QString &)));
 
@@ -337,6 +348,12 @@ void ResourceObject::handleAuthenticationRequired(QNetworkReply *reply, QAuthent
 		authenticator->setPassword(settings.password);
 		++loginTry;
 	}
+}
+
+void ResourceObject::networkRequest(QNetworkAccessManager& nam, QNetworkAccessManager::Operation op,
+	const QNetworkRequest& req, QIODevice* outgoingData, QNetworkReply*& reply) {
+
+	emit multiPageLoader.outer.networkRequest(nam, op, req, outgoingData, reply);
 }
 
 void ResourceObject::warning(const QString & str) {

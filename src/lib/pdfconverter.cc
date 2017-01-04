@@ -76,6 +76,19 @@ bool DLL_LOCAL looksLikeHtmlAndNotAUrl(QString str) {
 	return s.count('<') > 0 || str.startsWith("data:", Qt::CaseInsensitive);
 }
 
+void PdfConverterPrivate::connectPageLoaderSignals(MultiPageLoader& pageLoader, const char* loadMemberSlot) {
+	connect(&pageLoader, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
+	connect(&pageLoader, SIGNAL(loadFinished(bool)), this, loadMemberSlot);
+	connect(&pageLoader, SIGNAL(error(QString)), this, SLOT(forwardError(QString)));
+	connect(&pageLoader, SIGNAL(warning(QString)), this, SLOT(forwardWarning(QString)));
+	connect(&pageLoader, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
+	connect(&pageLoader,
+		&MultiPageLoader::networkRequest,
+		this,
+		&ConverterPrivate::forwardNetworkRequest,
+		Qt::DirectConnection);
+}
+
 PdfConverterPrivate::PdfConverterPrivate(PdfGlobal & s, PdfConverter & o) :
 	settings(s), pageLoader(s.load, true),
 	out(o), printer(0), painter(0)
@@ -99,31 +112,13 @@ PdfConverterPrivate::PdfConverterPrivate(PdfGlobal & s, PdfConverter & o) :
 	phaseDescriptions.push_back("Printing pages");
 	phaseDescriptions.push_back("Done");
 
-	connect(&pageLoader, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
-	connect(&pageLoader, SIGNAL(loadFinished(bool)), this, SLOT(pagesLoaded(bool)));
-	connect(&pageLoader, SIGNAL(error(QString)), this, SLOT(forwardError(QString)));
-	connect(&pageLoader, SIGNAL(warning(QString)), this, SLOT(forwardWarning(QString)));
+	connectPageLoaderSignals(pageLoader, SLOT(pagesLoaded(bool)));
 
 #ifdef __EXTENSIVE_WKHTMLTOPDF_QT_HACK__
-    connect(&measuringHFLoader, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
-    connect(&measuringHFLoader, SIGNAL(loadFinished(bool)), this, SLOT(measuringHeadersLoaded(bool)));
-    connect(&measuringHFLoader, SIGNAL(error(QString)), this, SLOT(forwardError(QString)));
-    connect(&measuringHFLoader, SIGNAL(warning(QString)), this, SLOT(forwardWarning(QString)));
-
-    connect(&hfLoader, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
-	connect(&hfLoader, SIGNAL(loadFinished(bool)), this, SLOT(headersLoaded(bool)));
-	connect(&hfLoader, SIGNAL(error(QString)), this, SLOT(forwardError(QString)));
-	connect(&hfLoader, SIGNAL(warning(QString)), this, SLOT(forwardWarning(QString)));
-
-    connect(&tocLoader1, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
-	connect(&tocLoader1, SIGNAL(loadFinished(bool)), this, SLOT(tocLoaded(bool)));
-	connect(&tocLoader1, SIGNAL(error(QString)), this, SLOT(forwardError(QString)));
-	connect(&tocLoader1, SIGNAL(warning(QString)), this, SLOT(forwardWarning(QString)));
-
-	connect(&tocLoader2, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
-	connect(&tocLoader2, SIGNAL(loadFinished(bool)), this, SLOT(tocLoaded(bool)));
-	connect(&tocLoader2, SIGNAL(error(QString)), this, SLOT(forwardError(QString)));
-	connect(&tocLoader2, SIGNAL(warning(QString)), this, SLOT(forwardWarning(QString)));
+	connectPageLoaderSignals(measuringHFLoader, SLOT(measuringHeadersLoaded(bool)));
+	connectPageLoaderSignals(hfLoader, SLOT(headersLoaded(bool)));
+	connectPageLoaderSignals(tocLoader1, SLOT(tocLoaded(bool)));
+	connectPageLoaderSignals(tocLoader2, SLOT(tocLoaded(bool)));
 #endif
 
 	if ( ! settings.viewportSize.isEmpty())
@@ -218,7 +213,7 @@ void PdfConverterPrivate::beginConvert() {
 		if (!s.isTableOfContent) {
 			o.loaderObject = pageLoader.addResource(s.page, s.load, &o.data);
 			o.page = &o.loaderObject->page;
-            o.page->mainFrame()->setZoomFactor(s.load.zoomFactor);
+			o.page->mainFrame()->setZoomFactor(s.load.zoomFactor);
 			PageObject::webPageToObject[o.page] = &o;
 			updateWebSettings(o.page->settings(), s.web);
 		}

@@ -37,9 +37,10 @@ HEADERS += ../lib/imageconverter_p.hh
 SOURCES += ../lib/imagesettings.cc ../lib/imageconverter.cc
 
 #C-Bindings
-PUBLIC_HEADERS += ../../include/wkhtmltox/pdf.h ../../include/wkhtmltox/image.h
+PUBLIC_HEADERS += ../../include/wkhtmltox/pdf.h ../../include/wkhtmltox/image.h ../../include/wkhtmltox/network.h
 HEADERS += ../lib/pdf_c_bindings_p.hh ../lib/image_c_bindings_p.hh
-SOURCES += ../lib/pdf_c_bindings.cc ../lib/image_c_bindings.cc
+SOURCES += ../lib/pdf_c_bindings.cc ../lib/image_c_bindings.cc \
+	   ../lib/network_c_bindings.cc
 
 
 HEADERS += $$PUBLIC_HEADERS

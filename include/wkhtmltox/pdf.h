@@ -1,5 +1,7 @@
-/*
- * Copyright 2010 wkhtmltopdf authors
+/* -*- mode: c++; tab-width: 4; indent-tabs-mode: t; eval: (progn (c-set-style "stroustrup") (c-set-offset 'innamespace 0)); -*-
+ * vi:set ts=4 sts=4 sw=4 noet :
+ *
+ * Copyright 2010-2016 wkhtmltopdf authors
  *
  * This file is part of wkhtmltopdf.
  *
@@ -19,6 +21,8 @@
 
 #ifndef __PDF_H__
 #define __PDF_H__
+#include <wkhtmltox/network.h>
+
 #include <wkhtmltox/dllbegin.inc>
 
 struct wkhtmltopdf_global_settings;
@@ -27,12 +31,19 @@ typedef struct wkhtmltopdf_global_settings wkhtmltopdf_global_settings;
 struct wkhtmltopdf_object_settings;
 typedef struct wkhtmltopdf_object_settings wkhtmltopdf_object_settings;
 
+// MyPdfConverter
 struct wkhtmltopdf_converter;
 typedef struct wkhtmltopdf_converter wkhtmltopdf_converter;
 
 typedef void (*wkhtmltopdf_str_callback)(wkhtmltopdf_converter * converter, const char * str);
 typedef void (*wkhtmltopdf_int_callback)(wkhtmltopdf_converter * converter, const int val);
 typedef void (*wkhtmltopdf_void_callback)(wkhtmltopdf_converter * converter);
+typedef wkhtmltox_network_reply * (*wkhtmltopdf_request_callback)(
+	wkhtmltopdf_converter * converter,
+	wkhtmltox_network_access_manager * nam,
+	wkhtmltox_network_operation operation,
+	const wkhtmltox_network_request * req,
+	wkhtmltox_stream * reqData);
 
 CAPI(int) wkhtmltopdf_init(int use_graphics);
 CAPI(int) wkhtmltopdf_deinit();
@@ -59,6 +70,7 @@ CAPI(void) wkhtmltopdf_set_error_callback(wkhtmltopdf_converter * converter, wkh
 CAPI(void) wkhtmltopdf_set_phase_changed_callback(wkhtmltopdf_converter * converter, wkhtmltopdf_void_callback cb);
 CAPI(void) wkhtmltopdf_set_progress_changed_callback(wkhtmltopdf_converter * converter, wkhtmltopdf_int_callback cb);
 CAPI(void) wkhtmltopdf_set_finished_callback(wkhtmltopdf_converter * converter, wkhtmltopdf_int_callback cb);
+CAPI(void) wkhtmltopdf_set_network_request_callback(wkhtmltopdf_converter * converter, wkhtmltopdf_request_callback cb);
 /* CAPI(void) wkhtmltopdf_begin_conversion(wkhtmltopdf_converter * converter); */
 /* CAPI(void) wkhtmltopdf_cancel(wkhtmltopdf_converter * converter); */
 CAPI(int) wkhtmltopdf_convert(wkhtmltopdf_converter * converter);

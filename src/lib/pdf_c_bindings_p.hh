@@ -25,6 +25,10 @@
 #include "pdfconverter.hh"
 #include <QObject>
 #include <QHash>
+#include <QNetworkAccessManager>
+#include <QIODevice>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include <vector>
 
 #include "dllbegin.inc"
@@ -37,12 +41,13 @@ public:
 	wkhtmltopdf_void_callback phase_changed;
 	wkhtmltopdf_int_callback progress_changed;
 	wkhtmltopdf_int_callback finished_cb;
+	wkhtmltopdf_request_callback request_cb;
 
 	wkhtmltopdf::PdfConverter converter;
 
 	wkhtmltopdf::settings::PdfGlobal * globalSettings;
 	std::vector<wkhtmltopdf::settings::PdfObject *> objectSettings;
-  QHash<QString, QByteArray> utf8StringCache;
+	QHash<QString, QByteArray> utf8StringCache;
 
 	MyPdfConverter(wkhtmltopdf::settings::PdfGlobal * gs);
 	~MyPdfConverter();
@@ -52,6 +57,9 @@ public slots:
     void phaseChanged();
     void progressChanged(int progress);
     void finished(bool ok);
+	void networkRequest(QNetworkAccessManager& nam,
+		QNetworkAccessManager::Operation op, const QNetworkRequest& req,
+		QIODevice* outgoingData, QNetworkReply*& reply);
 private:
     MyPdfConverter(const MyPdfConverter&);
 };

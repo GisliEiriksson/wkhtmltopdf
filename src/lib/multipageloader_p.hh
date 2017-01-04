@@ -55,9 +55,14 @@ public:
 	void dispose();
 	void allow(QString path);
 	MyNetworkAccessManager(const settings::LoadPage & s);
+	// For C-api access
+	inline QNetworkReply * baseCreateRequest(Operation op, const QNetworkRequest & req, QIODevice * outgoingData) { 
+		return QNetworkAccessManager::createRequest(op, req, outgoingData); }
 	QNetworkReply * createRequest(Operation op, const QNetworkRequest & req, QIODevice * outgoingData = 0);
 signals:
 	void warning(const QString & text);
+	void networkRequest(QNetworkAccessManager& nam, Operation op,
+		const QNetworkRequest& req, QIODevice* outgoingData, QNetworkReply*& reply);
 };
 
 class DLL_LOCAL MultiPageLoaderPrivate;
@@ -106,6 +111,8 @@ public slots:
 	void error(const QString & str);
 	void sslErrors(QNetworkReply *reply, const QList<QSslError> &);
 	void amfinished(QNetworkReply * reply);
+	void networkRequest(QNetworkAccessManager& nam, QNetworkAccessManager::Operation op,
+		const QNetworkRequest& req, QIODevice* outgoingData, QNetworkReply*& reply);
 };
 
 class DLL_LOCAL MyCookieJar: public QNetworkCookieJar {

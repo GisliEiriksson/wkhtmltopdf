@@ -57,6 +57,9 @@ public slots:
 	bool convert();
 	void forwardError(QString error);
 	void forwardWarning(QString warning);
+	void forwardNetworkRequest(
+		QNetworkAccessManager& nam, QNetworkAccessManager::Operation op,
+		const QNetworkRequest& req, QIODevice* outgoingData, QNetworkReply*& reply);
 private:
   friend class Converter;
 };
