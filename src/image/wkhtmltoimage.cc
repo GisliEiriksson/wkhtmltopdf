@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
 	QApplication a(argc, argv, use_graphics);
 	MyLooksStyle * style = new MyLooksStyle();
 	a.setStyle(style);
+	a.setAttribute(Qt::AA_Use96Dpi, true);
 
 	//Create the actual page converter to convert the pages
 	wkhtmltopdf::ImageConverter converter(settings);

@@ -336,6 +336,7 @@ CAPI(int) wkhtmltopdf_init(int use_graphics) {
 		a = new QApplication(aa, arg, ug);
 		MyLooksStyle * style = new MyLooksStyle();
 		a->setStyle(style);
+		a->setAttribute(Qt::AA_Use96Dpi, true);
 	}
 	return 1;
 }

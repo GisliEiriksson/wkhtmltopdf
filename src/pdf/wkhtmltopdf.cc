@@ -143,6 +143,7 @@ int main(int argc, char * argv[]) {
 	QApplication a(argc, argv, use_graphics);
 	MyLooksStyle * style = new MyLooksStyle();
 	a.setStyle(style);
+	a.setAttribute(Qt::AA_Use96Dpi, true);
 
 	if (parser.readArgsFromStdin) {
 		char buff[20400];
