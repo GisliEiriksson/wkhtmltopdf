@@ -26,9 +26,9 @@ CAPI(void) wkhtmltox_network_request_get_url(const wkhtmltox_network_request* re
 	QByteArray s(reinterpret_cast<const QNetworkRequest*>(req)->url().toEncoded());
 	int bufLen(*cb);
 
-	*cb = s.length();
+	*cb = s.length() + 1; // Include the null-terminator
 	if (url)
-		strcpy_s(url, bufLen, s.constData());
+		strncpy_s(url, bufLen, s.constData(), bufLen - 1 /* ensure the null-terminator is included. */);
 }
 CAPI(void) wkhtmltox_network_request_set_url(wkhtmltox_network_request* req, const char* url) {
 	reinterpret_cast<QNetworkRequest*>(req)->setUrl(QUrl(QString::fromUtf8(url)));
