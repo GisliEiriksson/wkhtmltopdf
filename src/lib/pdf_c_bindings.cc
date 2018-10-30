@@ -267,6 +267,12 @@ MyPdfConverter::MyPdfConverter(settings::PdfGlobal * gs):
 		this,
 		&MyPdfConverter::networkRequest,
 		Qt::DirectConnection);
+
+	connect(&converter, SIGNAL(producingForms(bool)), a->style(), SLOT(producingForms(bool)));
+	connect(&converter, SIGNAL(checkboxSvgChanged(const QString &)), a->style(), SLOT(setCheckboxSvg(const QString &)));
+	connect(&converter, SIGNAL(checkboxCheckedSvgChanged(const QString &)), a->style(), SLOT(setCheckboxCheckedSvg(const QString &)));
+	connect(&converter, SIGNAL(radiobuttonSvgChanged(const QString &)), a->style(), SLOT(setRadioButtonSvg(const QString &)));
+	connect(&converter, SIGNAL(radiobuttonCheckedSvgChanged(const QString &)), a->style(), SLOT(setRadioButtonCheckedSvg(const QString &)));
 }
 
 MyPdfConverter::~MyPdfConverter() {
