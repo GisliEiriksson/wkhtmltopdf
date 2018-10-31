@@ -33,10 +33,13 @@
  */
 class DLL_PUBLIC MyLooksStyle: public QProxyStyle {
 	Q_OBJECT
+private:
+	float zoomFactor;
 public:
 	typedef QProxyStyle parent_t;
 	MyLooksStyle();
 	void drawPrimitive( PrimitiveElement element, const QStyleOption * option, QPainter * painter, const QWidget * widget = 0 ) const;
+	int pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const;
 	bool weAreDrawingForms;
 
 	static QSvgRenderer * checkbox;
@@ -49,6 +52,7 @@ public slots:
 	void setCheckboxCheckedSvg(const QString & path);
 	void setRadioButtonSvg(const QString & path);
 	void setRadioButtonCheckedSvg(const QString & path);
+	void setZoomFactor(float zoomFactor);
 };
 
 DLL_PUBLIC int handleError(bool success, int errorCode);

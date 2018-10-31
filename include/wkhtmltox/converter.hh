@@ -53,6 +53,7 @@ signals:
 	void checkboxCheckedSvgChanged(const QString & path);
 	void radiobuttonSvgChanged(const QString & path);
 	void radiobuttonCheckedSvgChanged(const QString & path);
+	void zoomFactorChanged(float zoomFactor);
 public slots:
     void beginConvertion();
 	bool convert();

@@ -273,6 +273,7 @@ MyPdfConverter::MyPdfConverter(settings::PdfGlobal * gs):
 	connect(&converter, SIGNAL(checkboxCheckedSvgChanged(const QString &)), a->style(), SLOT(setCheckboxCheckedSvg(const QString &)));
 	connect(&converter, SIGNAL(radiobuttonSvgChanged(const QString &)), a->style(), SLOT(setRadioButtonSvg(const QString &)));
 	connect(&converter, SIGNAL(radiobuttonCheckedSvgChanged(const QString &)), a->style(), SLOT(setRadioButtonCheckedSvg(const QString &)));
+	connect(&converter, SIGNAL(zoomFactorChanged(float)), a->style(), SLOT(setZoomFactor(float)));
 }
 
 MyPdfConverter::~MyPdfConverter() {

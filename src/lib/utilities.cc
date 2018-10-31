@@ -93,7 +93,13 @@ void MyLooksStyle::setRadioButtonCheckedSvg(const QString & path) {
 			"<circle id=\"c2\" cx=\"5.5\" cy=\"5.5\" r=\"1.5\" fill=\"black\" stroke=\"\" stroke-width=\"0\"/>\n", 11, 11);
 }
 
-MyLooksStyle::MyLooksStyle(): weAreDrawingForms(false) {
+void MyLooksStyle::setZoomFactor(float zoomFactor)
+{
+	this->zoomFactor = zoomFactor;
+}
+
+MyLooksStyle::MyLooksStyle(): weAreDrawingForms(false),
+	zoomFactor(1.0) {
 }
 
 void MyLooksStyle::producingForms(bool f) {weAreDrawingForms=f;}
@@ -134,6 +140,21 @@ void MyLooksStyle::drawPrimitive( PrimitiveElement element, const QStyleOption *
 			radiobutton->render(painter, r);
 	} else {
 		parent_t::drawPrimitive(element, option, painter, widget);
+	}
+}
+
+int MyLooksStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const {
+	switch (metric)
+	{
+	case PM_ExclusiveIndicatorHeight:
+	case PM_ExclusiveIndicatorWidth:
+	case PM_IndicatorHeight:
+	case PM_IndicatorWidth:
+	case PM_CheckBoxLabelSpacing:
+	case PM_RadioButtonLabelSpacing:
+		return parent_t::pixelMetric(metric, option, widget)*zoomFactor;
+	default:
+		return parent_t::pixelMetric(metric, option, widget);
 	}
 }
 
