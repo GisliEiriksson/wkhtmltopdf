@@ -996,6 +996,7 @@ void PdfConverterPrivate::endPrintObject(PageObject & obj) {
 
 		painter->restore();
 	}
+	emit out.zoomFactorChanged(1.0);
 
 }
 
